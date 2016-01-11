@@ -1,4 +1,4 @@
-// generated on 2015-12-21 using generator-gulp-webapp 1.0.3
+// generated on 2015-12-01 using generator-gulp-webapp 1.0.3
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
@@ -22,12 +22,44 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-gulp.task('html', ['views', 'styles', 'scripts'], () => {
+function lint(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe(reload({stream: true, once: true}))
+      .pipe($.eslint(options))
+      .pipe($.eslint.format())
+      .pipe($.if(!browserSync.active, $.eslint.failAfterError()));
+  };
+}
+const testLintOptions = {
+  env: {
+    mocha: true
+  }
+};
+
+gulp.task('lint', lint('app/scripts/**/*.js'));
+gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
+
+gulp.task('html', ['views', 'templates', 'minify:templates', 'styles', 'scripts'], () => {
+  
+  const assets = $.useref.assets({searchPath: ['.tmp', 'app', '.']});
+
   return gulp.src(['app/*.html', '.tmp/*.html'])
+    .pipe(assets)
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+    .pipe(assets.restore())
+    //.pipe($.useref())
+    .pipe($.htmlReplace({
+      modernizr: 'scripts/bower/modernizr.js',
+      require:{
+        src: [['scripts/main', 'scripts/bower/require.js']],
+        tpl: '<script data-main="%s" src="%s"></script>',
+      }
+    }))
     .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
     .pipe(gulp.dest('dist'));
+  
 });
 
 gulp.task('images', () => {
@@ -118,15 +150,24 @@ gulp.task('serve:test', () => {
   });
 
   gulp.watch('test/spec/**/*.js').on('change', reload);
+  gulp.watch('test/spec/**/*.js', ['lint:test']);
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
+// inject bower components
+
+// default building all components
+gulp.task('default', ['clean'], () => {
+  gulp.start('build-modules');
+});
+
+gulp.task('build-modules', ['html', 'bower', 'bower:path', 'images', 'fonts', 'extras'], () => {
+  gulp.start('build-size');
+});
+
+gulp.task('build-size', ['modules'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
-
-gulp.task('default', ['clean'], () => {
-  gulp.start('build');
-});
+// --- end def building
 
 gulp.task('views', () => {
   return gulp.src('app/*.jade')
@@ -139,4 +180,47 @@ gulp.task('scripts', () => {
   return gulp.src('app/scripts/**/*.coffee')
     .pipe($.coffee())
     .pipe(gulp.dest('.tmp/scripts'));
+});
+
+gulp.task('deploy', ['build-size'], () => {
+  return gulp.src('./dist/**/*')
+    .pipe($.ghPages());
+});
+
+gulp.task('dep', () => {
+  return gulp.src('./dist/**/*')
+    .pipe($.ghPages());
+});
+
+gulp.task('modules', $.shell.task(['r.js.cmd -o build.js']));
+
+gulp.task('bower', () => {
+  return gulp.src(['bower_components/modernizr/modernizr.js', 'bower_components/requirejs/require.js'])
+    .pipe(gulp.dest('dist/scripts/bower'));
+});
+
+gulp.task('bower:path', () => {
+  return gulp.src(['dist/index.html'])
+    .pipe($.htmlReplace({
+      modernizr: 'scripts/bower/modernizr.js',
+      require:{
+        src: [['scripts/main', 'scripts/bower/require.js']],
+        tpl: '<script data-main="%s" src="%s"></script>',
+      }
+    }))
+    .pipe(gulp.dest('dist/html'));
+});
+
+gulp.task('templates', () => {
+  return gulp.src('app/scripts/templates/*.jade')
+    .pipe($.jade({pretty: true}))
+    .pipe(gulp.dest('.tmp/scripts/templates'))
+    .pipe(reload({stream: true}));
+});
+
+gulp.task('minify:templates', () => {
+  return gulp.src('.tmp/scripts/templates/*.html')
+    .pipe($.minifyHtml({conditionals: true, loose: true}))
+    .pipe(gulp.dest('.tmp/scripts/templates'))
+    .pipe(reload({stream: true}));
 });
