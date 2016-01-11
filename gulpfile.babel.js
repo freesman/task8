@@ -1,9 +1,8 @@
-// generated on 2015-12-28 using generator-gulp-webapp 1.0.3
+// generated on 2015-12-21 using generator-gulp-webapp 1.0.3
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
-import {stream as wiredep} from 'wiredep';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -23,33 +22,10 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-function lint(files, options) {
-  return () => {
-    return gulp.src(files)
-      .pipe(reload({stream: true, once: true}))
-      .pipe($.eslint(options))
-      .pipe($.eslint.format())
-      .pipe($.if(!browserSync.active, $.eslint.failAfterError()));
-  };
-}
-const testLintOptions = {
-  env: {
-    mocha: true
-  }
-};
-
-gulp.task('lint', lint('app/scripts/**/*.js'));
-gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
-
-gulp.task('html', ['styles'], () => {
-  const assets = $.useref.assets({searchPath: ['.tmp', 'app', '.']});
-
-  return gulp.src('app/*.html')
-    .pipe(assets)
+gulp.task('html', ['views', 'styles', 'scripts'], () => {
+  return gulp.src(['app/*.html', '.tmp/*.html'])
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
-    .pipe(assets.restore())
-    .pipe($.useref())
     .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
     .pipe(gulp.dest('dist'));
 });
@@ -81,7 +57,8 @@ gulp.task('fonts', () => {
 gulp.task('extras', () => {
   return gulp.src([
     'app/*.*',
-    '!app/*.html'
+    '!app/*.html',
+    '!app/*.jade'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
@@ -89,7 +66,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts'], () => {
+gulp.task('serve', ['views', 'styles', 'scripts', 'fonts'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -103,14 +80,18 @@ gulp.task('serve', ['styles', 'fonts'], () => {
 
   gulp.watch([
     'app/*.html',
+    '.tmp/*.html',
     'app/scripts/**/*.js',
+    '.tmp/scripts/**/*.js',
     'app/images/**/*',
     '.tmp/fonts/**/*'
   ]).on('change', reload);
 
+  gulp.watch('app/**/*.jade', ['views']);
   gulp.watch('app/styles/**/*.scss', ['styles']);
+  gulp.watch('app/scripts/**/*.coffee', ['scripts', reload]);
   gulp.watch('app/fonts/**/*', ['fonts']);
-  gulp.watch('bower.json', ['wiredep', 'fonts']);
+  gulp.watch('bower.json', ['fonts']);
 });
 
 gulp.task('serve:dist', () => {
@@ -137,29 +118,25 @@ gulp.task('serve:test', () => {
   });
 
   gulp.watch('test/spec/**/*.js').on('change', reload);
-  gulp.watch('test/spec/**/*.js', ['lint:test']);
 });
 
-// inject bower components
-gulp.task('wiredep', () => {
-  gulp.src('app/styles/*.scss')
-    .pipe(wiredep({
-      ignorePath: /^(\.\.\/)+/
-    }))
-    .pipe(gulp.dest('app/styles'));
-
-  gulp.src('app/*.html')
-    .pipe(wiredep({
-      exclude: ['bootstrap-sass'],
-      ignorePath: /^(\.\.\/)*\.\./
-    }))
-    .pipe(gulp.dest('app'));
-});
-
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
 gulp.task('default', ['clean'], () => {
   gulp.start('build');
+});
+
+gulp.task('views', () => {
+  return gulp.src('app/*.jade')
+    .pipe($.jade({pretty: true}))
+    .pipe(gulp.dest('.tmp'))
+    .pipe(reload({stream: true}));
+});
+
+gulp.task('scripts', () => {
+  return gulp.src('app/scripts/**/*.coffee')
+    .pipe($.coffee())
+    .pipe(gulp.dest('.tmp/scripts'));
 });
