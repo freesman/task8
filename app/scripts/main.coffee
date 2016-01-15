@@ -24,6 +24,4 @@ require(
   ['backbone', 'views/appView', 'routers/listRouter']
   (Backbone, AppView, Workspace) ->
     new AppView()
-    new Workspace()
-    Backbone.history.start()
 )

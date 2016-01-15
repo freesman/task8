@@ -4,11 +4,11 @@ define(
     SongModel = Backbone.Model.extend(
       defaults:
         title: ''
-        author: ''
-        genre: ''
+        author:''
+        genre:''
         filtered: false
       toggle: ->
-        this.save(filtered: !this.get('filtered'))
+        this.save(filtered: !this.get('filtered')) #save?????
     )
     return SongModel
 )

@@ -1,13 +1,15 @@
-<td class = 'view'>
-  <div><%- title %></div>
-  <input class='edit title form-control' data-id='title' value='<%- title %>'></input>
-</td>
-<td class = 'view'>
-  <div><%- author %></div>
-  <input class='edit author form-control' data-id='author' value='<%- author %>'></input>
-</td>
-<td class = 'view'>
-  <div><%- genre %></div>
-  <input class='edit genre form-control' data-id='genre' value='<%- genre %>'></input>
-</td>
-<td class = 'destroy'>&times;</td>
+<tr>
+  <td class = 'view'>
+    <span data-bind = 'text:title'></span>
+    <input class = 'edit form-control', data-bind = 'value:title, events:["keyup"]'></input>
+  </td>
+  <td class = 'view'>
+    <span data-bind = 'text:author'></span>
+    <input class = 'edit form-control', data-bind = 'value:author, events:["keyup"]'></input>
+  </td>
+  <td class = 'view'>
+    <span data-bind = 'text:genre'></span>
+    <input class = 'edit form-control', data-bind = 'value:genre, events:["keyup"]' ></input>
+  </td>
+  <td class = 'destroy'>&times;</td>
+</tr>

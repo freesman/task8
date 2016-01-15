@@ -29,16 +29,5 @@ block content
         p title
         p author
         p genre
-
       table.listContentBlock.table.table-striped.table-bordered
-        tbody.table.table-striped
-
-  #routeModule.main.jumbotron
-    .routeElement
-      .num
-        p #id
-      p#routeTitle title:
-      p#routeAuthor author:
-      p#routeGenre genre:
-    .routeMessage
-      p
+        tbody.table.table-striped(data-bind = 'collection:$collection')
