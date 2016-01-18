@@ -14882,7 +14882,8 @@ define('text!templates/song.html',[],function () { return '\n<tr>\n  <td class="
         };
       },
       clearList: function() {
-        return _.invoke(SongsCollection.toArray(), 'destroy');
+        _.invoke(SongsCollection.toArray(), 'destroy');
+        return Backbone.history.navigate('', true);
       },
       routeFilter: function() {
         var author, filterStr, genre, title;
