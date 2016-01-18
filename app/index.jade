@@ -3,10 +3,10 @@ extends layouts/default
 block content
   #mainBlock.main.jumbotron
     #inputBlock
-      #alertWarn.alert.alert-warning.fade
+      #alertWarnAdd.alert.alert-warning
         a.close(href = '#' arial-label = 'close') &times;
         strong Warning!
-        span.WarningMes mytext
+        span.WarningMes Not all fields are filled
       #inputSongBlock
         input#songTitle.form-control(placeholder = 'add song title')
         input#songAuthor.form-control(placeholder = 'add song author')
@@ -15,12 +15,16 @@ block content
         button#addBut.btn.btn-primary add song
         button#delAllBut.btn.btn-danger clear list
     #filterBlock
+      #alertWarnFilter.alert.alert-warning
+        a.close(href = '#' arial-label = 'close') &times;
+        strong Warning!
+        span.WarningMes No search terms
       #inputFilterBlock
         input#titleFilter.form-control(placeholder = 'title filter')
         input#authorFilter.form-control(placeholder = 'author filter')
         input#genreFilter.form-control(placeholder = 'genre filter')
       #filterBlockBut
-        #alertFilter.alert.alert-warning.fade
+        #alertFilter.alert.alert-warning
           strong !
         button#filterBut.btn.btn-primary filter
         button#resetBut.btn.btn-warning reset
@@ -31,3 +35,13 @@ block content
         p genre
       table.listContentBlock.table.table-striped.table-bordered
         tbody.table.table-striped(data-bind = 'collection:$collection')
+
+  #routeModule.main.jumbotron
+    .routeElement
+      .num
+        p #id
+      p#routeTitle title:
+      p#routeAuthor author:
+      p#routeGenre genre:
+    .routeMessage
+      p

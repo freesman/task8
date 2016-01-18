@@ -67,6 +67,7 @@
 // filterBlock and include content (filter input) -------------------------FILTER_INPUT
 
 #filterBlock{
+  position: relative;
   width: inherit;
   height: 60px;
 }
@@ -163,11 +164,7 @@
 }
 
 
-.filtered{
-  display: none;
-}
-
-.edit{
+.filterOut, .edit, .editing span{
   display: none;
 }
 
@@ -179,22 +176,26 @@
   box-shadow: none;
 }
 
-.editing span{
-  display: none;
-}
-
 .table{
   margin-bottom: 0px;
 }
 
 //alert blocks ------------------ALERT
 
-#inputBlock #alertWarn{
+#inputBlock #alertWarnAdd{
   display: none;
   position: absolute;
-  left: 378px;
+  left: 318px;
   top: 4px;
-  width: 200px;
+  width: 260px;
+}
+
+#filterBlock #alertWarnFilter{
+  display: none;
+  position: absolute;
+  left: 348px;
+  top: 3px;
+  width: 230px;
 }
 
 .WarningMes{
@@ -202,6 +203,7 @@
 }
 
 #filterBlockBut #alertFilter{
+  display: none;
   position: absolute;
   left: -14px;
   margin-top: 12px;
